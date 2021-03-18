@@ -1,0 +1,110 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+println "${project.name}:root build.gradle start"
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.1.2"
+        classpath 'com.tencent.tigermei.plugin:GreetingPlugin:1.1-SNAPSHOT'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+project.task("preBuild").doFirst {
+    println 'preBuild doFirst'
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+
+task helloTask {
+    println hello
+    println project.getProperties().get("hello")
+
+}
+
+
+Logger mLogger = new Logger("gradleProcess", project)
+gradle.taskGraph.afterTask { task ->
+    if (!task.project.getName().contains("app")) {
+        return
+    }
+    StringBuffer taskDetails = new StringBuffer()
+    taskDetails << """-----task begin-------->;
+project:     $task.project 
+name:        $task.name 
+group:       $task.group 
+description: $task.description
+conv:        $task.convention.plugins
+inputs:
+"""
+    task.inputs.files.each { it ->
+        taskDetails << " ${it.absolutePath}\n"
+    }
+    taskDetails << "outputs:\n"
+    task.outputs.files.each { it ->
+        taskDetails << " ${it.absolutePath}\n"
+    }
+
+    taskDetails << "<------task end -------"
+
+    mLogger.log(taskDetails.toString())
+}
+
+class Logger {
+    File mFile
+
+    Logger(String fileName, Project project) {
+        mFile = new File(project.getRootDir(), String.format("%s-%s.txt", fileName, project.getName()))
+        try {
+            clear()
+            mFile.createNewFile()
+        } catch (IOException e) {
+            e.printStackTrace()
+        }
+    }
+
+    void clear() {
+        if (mFile != null) {
+            mFile.delete()
+        }
+    }
+
+    void log(String text) {
+        if (mFile != null) {
+            FileWriter fw = null;
+            try {
+                fw = new FileWriter(mFile, true);
+                fw.append(text + "\r\n");
+            } catch (IOException var9) {
+            } finally {
+                if (fw != null) {
+                    try {
+                        fw.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+}
+
+println "${project.name}:root build.gradle end"
+println "${project.name}:root build.gradle end"

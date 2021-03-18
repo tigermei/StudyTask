@@ -1,0 +1,6 @@
+
+include ':GreetingPlugin'
+include ':app'
+rootProject.name = "StudyTask"
+
+println("gradle name:" + gradle.class.name)

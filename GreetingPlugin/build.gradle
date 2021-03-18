@@ -1,0 +1,125 @@
+
+plugins {
+    // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
+    id 'java-gradle-plugin'
+
+    // Apply the Groovy plugin to add support for Groovy
+    id 'groovy'
+
+    id 'java'
+
+    // 应用 Maven Publish Plugin 发布插件
+    id 'maven-publish'
+}
+
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = [
+                    'src/main/groovy',
+                    'src/main/java'
+            ]
+        }  // compile everything in src/ with groovy
+        java { srcDirs = []}    // no source dirs for the java compiler
+
+    }
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+
+}
+
+// custom tasks for creating source jars
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// add source jar tasks as artifacts
+artifacts { archives sourcesJar }
+//
+//// upload to local
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            pom.groupId = 'com.tencent.tigermei.plugin'  //groupId ，自行定义，一般是包名
+//            pom.artifactId = 'GreetingPlugin' //artifactId ，自行定义
+//            pom.version = '1.1-SNAPSHOT' //version 版本号
+//            repository(url: mavenLocal().getUrl())
+//        }
+//    }
+//}
+
+
+repositories {
+    jcenter()
+}
+
+
+gradlePlugin {
+    // Define the plugin
+    plugins {
+        mavenJava {
+            id = 'com.tencent.tigermei.plugin'
+            implementationClass = 'com.tencent.tigermei.plugin.GreetingPlugin'
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication){
+            groupId 'com.tencent.tigermei.plugin'
+            artifactId 'GreetingPlugin'
+            version '1.1-SNAPSHOT'
+
+            from components.java
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
+
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+//
+//gradlePlugin {
+//    // Define the plugin
+//    plugins {
+//        hello {
+//            id = 'com.tencent.greetings.plugin'
+//            implementationClass = 'com.tencent.greetings.plugin.GreetingPlugin'
+//        }
+//    }
+//}
+//
+//publishing {
+//    publications {
+//        hello(MavenPublication) {
+//            // 插件的组ID，建议设置为插件的包名
+//            groupId = 'com.tencent.greetings.plugin'
+//            // 翻译过来是 工件ID，我的理解是插件的名字
+//            artifactId = 'GreetingPlugin'
+//            version = '1.1-SNAPSHOT'
+//            // 组件类型，我们的插件其实就是Java组件
+//            from components.java
+//        }
+//    }
+//
+//    repositories {
+//        maven {
+//            mavenLocal()
+//        }
+//    }
+//}
+
+println "${project.name}:greeeting plugin build.gradle end"
